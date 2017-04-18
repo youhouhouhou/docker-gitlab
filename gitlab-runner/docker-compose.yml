@@ -1,0 +1,47 @@
+
+# sudo chmod a+rw /var/run/docker.sock
+# gitlab cant distribute settings and keys, need to setup manually:
+# mkdir -p ${HOME}/gitlab-runner/home/.ssh ${HOME}/gitlab-runner/home/.m2 ${HOME}/gitlab-runner/etc
+# chmod -R 777 gitlab-runner
+# /home/gitlab-runner/.m2/settings-security.xml
+# /home/gitlab-runner/.ssh/internal-mvnsite or local-mvnsite
+# /home/gitlab-runner/.ssh/internal-git or local-git
+#
+# docker-compose build
+# docker-compose up -d
+# docker exec -it oss-gitlab-runner touch /home/gitlab-runner/.ssh/config
+# docker exec -it oss-gitlab-runner chmod 644 /home/gitlab-runner/.ssh/config
+# docker exec -it oss-gitlab-runner chown -R gitlab-runner:gitlab-runner /home/gitlab-runner
+# docker exec -it oss-gitlab-runner chmod 700 /home/gitlab-runner/.ssh
+# docker exec -it oss-gitlab-runner chmod 600 /home/gitlab-runner/.ssh/internal-mvnsite
+# docker exec -it oss-gitlab-runner chmod 600 /home/gitlab-runner/.ssh/internal-git
+# docker-compose restart
+# docker exec -it oss-gitlab-runner cat /home/gitlab-runner/.ssh/config
+# docker exec -it oss-gitlab-runner ls -la /home/gitlab-runner/.ssh
+#
+# docker exec -it oss-gitlab-runner gitlab-runner register
+
+version: '2.1'
+services:
+  gitlab-runner:
+    image: ${DOCKER_REGISTRY:-registry.docker.local}/oss-gitlab-runner:1.0.0-xenial
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    container_name: oss-gitlab-runner
+    hostname: oss-gitlab-runner
+    network_mode: host
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    # gitlab-runner 用户的 home 目录
+    - ${HOME}/gitlab-runner/home:/home/gitlab-runner
+    # gitlab-runner的配置目录
+    - ${HOME}/gitlab-runner/etc:/etc/gitlab-runner
+    environment:
+    - GIT_SERVICE_TOKEN=${GIT_SERVICE_TOKEN:-your_git_service_token}
+
+#networks:
+#  default:
+#    external:
+#      name: oss-network

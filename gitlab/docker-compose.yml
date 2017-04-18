@@ -1,0 +1,54 @@
+
+# Based on Go Git Service - a self hosted Git service
+# see: https://hub.docker.com/r/gitlab/gitlab/
+# see: https://github.com/gogits/gitlab/blob/master/Dockerfile
+# mkdir -p ${HOME}/private_git
+# docker run --name=private_git -p 20022:22 -p 20080:3000 -v ${HOME}/private_git:/data gitlab/gitlab:0.9.97;
+# http://local-git:20080/install
+
+# registry.docker.local/gitlab:0.9.97 is same as gitlab/gitlab:0.9.97
+# made by `docker tag gitlab/gitlab:0.9.97 registry.docker.local/gitlab:0.9.97; docker push registry.docker.local/gitlab:0.9.97`
+
+# export key
+# docker exec local-git /app/gitlab/entrypoint.sh export_git_admin_key > ~/.ssh/local-git
+
+version: '2.1'
+services:
+  git:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${DOCKER_REGISTRY:-registry.docker.local}/gitlab:8.16.4-ce.0
+    restart: always
+    container_name: ${GIT_HOSTNAME:-local-git}
+    hostname: ${GIT_HOSTNAME:-local-git}
+    ports:
+    - "20022:22"
+    - "10080:80"
+    volumes:
+    - local-git-volume:/data
+    - local-git-volume:${GIT_VOLUME:-/app/gitlab/data}
+    - ../../oss-configserver/src/main/resources/deploy_key.pub:${GIT_VOLUME:-/app/gitlab/data}/${GIT_HOSTNAME:-local-git}-deploy.pub
+    - ../../../:${GIT_VOLUME:-/app/gitlab/data}/workspace
+    - ./docker/git_init.sh:/app/gitlab/git_init.sh
+    - ./docker/entrypoint.sh:/app/gitlab/entrypoint.sh
+    - ./docker/gitlab_utils.sh:/app/gitlab/gitlab_utils.sh
+    environment:
+    - GIT_VOLUME=${GIT_VOLUME:-/app/gitlab/data}
+    - GIT_ADMIN_USERNAME=${GIT_ADMIN_USERNAME:-oss}
+    - GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD:-oss_pass}
+    - GIT_DEPLOY_KEY=${GIT_VOLUME:-/app/gitlab/data}/${GIT_HOSTNAME:-local-git}-deploy.pub
+    - GIT_HOSTNAME=${GIT_HOSTNAME:-local-git}
+    - GIT_HTTP_PORT=80
+    - GIT_SSH_PORT=22
+    - GIT_WORKSPACE=${GIT_VOLUME:-/app/gitlab/data}/workspace
+    - CONFIGSERVER_WEBHOOK_ENDPOINT=${CONFIGSERVER_WEBHOOK_ENDPOINT:-http://local-configserver:8888/monitor}
+    external_links:
+    - local-configserver:local-configserver
+volumes:
+  local-git-volume: {}
+
+networks:
+  default:
+    external:
+      name: oss-network
