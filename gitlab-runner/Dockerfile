@@ -1,5 +1,5 @@
 
-FROM registry.docker.local/ubuntu-scm:16.04
+FROM home1oss/ci-ubuntu:16.04
 
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.0.2/dumb-init_1.0.2_amd64 /usr/bin/dumb-init
 RUN chmod +x /usr/bin/dumb-init
