@@ -7,7 +7,7 @@ RUN chmod +x /usr/bin/dumb-init
 RUN echo "deb https://packages.gitlab.com/runner/gitlab-ci-multi-runner/ubuntu/ xenial main" > /etc/apt/sources.list.d/runner_gitlab-ci-multi-runner.list && \
     wget -q -O - https://packages.gitlab.com/gpg.key | apt-key add - && \
     apt-get update -y && \
-    apt-get install -y gitlab-ci-multi-runner && \
+    apt-get install -y gitlab-ci-multi-runner=1.11.2 && \
     apt-get clean && \
     mkdir -p /etc/gitlab-runner/certs && \
     chmod -R 700 /etc/gitlab-runner && \
