@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata: 
+  name: gitlab-runner
+  labels:
+    app: gitlab-runner
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: gitlab-runner
+    spec:
+      containers:
+      - image: registry.docker.yixinonline.org/oss-gitlab-runner:1.0.0-xenial
+        name: configserver
+        env:
+          - name: GIT_SERVICE_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: runner-secret
+                key: GIT_SERVICE_TOKEN
+        volumeMounts:
+          - name: home
+            mountPath: /home/gitlab-runner
+          - name: etc
+            mountPath: /etc/gitlab-runner
+          - name: docker
+            mountPath: /var/run/docker.sock
+      volumes:
+# 需要换成其他挂载形式，或者需要挂载的内容放到ci脚本中去下载
+        - name: home
+          hostPath:
+            path: /root/gitlab-runner/home
+#          nfs:
+#            server: 10.106.201.232
+#            path: "/root/gitlab-runner"
+        - name: etc
+          hostPath:
+             path: /root/gitlab-runner/etc
+#          nfs:
+#            server: 10.106.201.232
+#            path: "/root/gitlab-runner/etc"
+        - name: docker
+          hostPath:
+            path: /var/run/docker.sock
