@@ -15,6 +15,13 @@ spec:
       containers:
       - image: registry.docker.yixinonline.org/oss-gitlab-runner:1.0.0-xenial
         name: configserver
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1024Mi
+          requests:
+            cpu: "1"
+            memory: 1024Mi
         env:
           - name: GIT_SERVICE_TOKEN
             valueFrom:
