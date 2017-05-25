@@ -13,7 +13,7 @@ spec:
         app: gitlab-runner
     spec:
       containers:
-      - image: home1oss/oss-gitlab-runner:1.0.1-xenial
+      - image: home1oss/gitlab-runner:1.0.1-xenial
         name: configserver
         resources:
           limits:
