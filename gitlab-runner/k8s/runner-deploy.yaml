@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - image: home1oss/gitlab-runner:1.0.1-xenial
-        name: configserver
+        name: gitlab-runner
         resources:
           limits:
             cpu: "1"
